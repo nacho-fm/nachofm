@@ -1,26 +1,26 @@
 # nachogym
-
-## Setup k8s on Mac for development purposes
+## Setup Development Environment
+### Setup k8s on Mac for development purposes
 - Install docker for mac here: https://docs.docker.com/docker-for-mac/install/
 - Enable kubernetes: https://docs.docker.com/docker-for-mac/#kubernetes
 - Install kubernetes dashboard: https://github.com/kubernetes/dashboard
 - Setup kubernetes dashboard user
--- From deploy/mac, run:
---- kubectl apply -f dashboard-adminuser.yaml
---- kubectl apply -f dashboard-rbac-rolebinding.yaml
--- On the CLI, run:
---- kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') 
--- From Chrome (note, as of this writing does not work from Firefox), go to:
---- http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
---- Select Token, and paste the token from the above kubectl command into the Enter token * field
+  - From deploy/mac, run:
+    - kubectl apply -f dashboard-adminuser.yaml
+    - kubectl apply -f dashboard-rbac-rolebinding.yaml
+  - On the CLI, run:
+    - kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | grep admin-user | awk '{print $1}') 
+  - From Chrome (note, as of this writing does not work from Firefox), go to:
+    - http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
+    - Select Token, and paste the token from the above kubectl command into the Enter token * field
 
-## Install and run keycloak on k8s
+### Install and run keycloak on k8s
 - helm repo add codecentric https://codecentric.github.io/helm-charts
 - helm install keycloak codecentric/keycloak
 - export POD_NAME=$(kubectl get pods --namespace default -l app.kubernetes.io/instance=keycloak -o jsonpath="{.items[0].metadata.name}")
 - kubectl port-forward --namespace default $POD_NAME 8080
 
-## Install and run postgres on k8s (https://github.com/bitnami/charts/)
+### Install and run postgres on k8s (https://github.com/bitnami/charts/)
 - helm repo add bitnami https://charts.bitnami.com/bitnami
 - helm install postgresql bitnami/postgresql
 - PostgreSQL can be accessed via port 5432 on the following DNS name from within your cluster:
