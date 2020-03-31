@@ -14,12 +14,6 @@
     - http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
     - Select Token, and paste the token from the above kubectl command into the Enter token * field
 
-### Install and run keycloak on k8s
-- helm repo add codecentric https://codecentric.github.io/helm-charts
-- helm install keycloak codecentric/keycloak
-- export POD_NAME=$(kubectl get pods --namespace default -l app.kubernetes.io/instance=keycloak -o jsonpath="{.items[0].metadata.name}")
-- kubectl port-forward --namespace default $POD_NAME 8080
-
 ### Install and run postgres on k8s (https://github.com/bitnami/charts/)
 - helm repo add bitnami https://charts.bitnami.com/bitnami
 - helm install postgresql bitnami/postgresql
@@ -39,4 +33,27 @@ To connect to your database from outside the cluster execute the following comma
 
     kubectl port-forward --namespace default svc/postgresql 5432:5432 &
     PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432
+
+### Setup Postgres with Keycloak User and DB
+
+From the CLI:
+createuser keycloak
+psql
+ALTER USER keycloak WITH ENCRYPTED password 'keycloak';
+CREATE DATABASE keycloak WITH ENCODING='UTF8' OWNER=keycloak;
+\q
+
+### Install and run keycloak on k8s
+- helm repo add codecentric https://codecentric.github.io/helm-charts
+- helm install keycloak --set keycloak.persistence.dbVendor=postgres --set keycloak.persistence.dbName=keycloak --set keycloak.persistence.dbHost=postgresql --set keycloak.persistence.dbPort=5432 --set keycloak.persistence.dbUser=keycloak --set keycloak.persistence.dbPassword=keycloak --set keycloak.persistence.deployPostgres=false codecentric/keycloak
+- export POD_NAME=$(kubectl get pods --namespace default -l app.kubernetes.io/instance=keycloak -o jsonpath="{.items[0].metadata.name}")
+- kubectl port-forward --namespace default $POD_NAME 8080
+
+### Add admin user to Keycloak
+
+kubectl exec -it keycloak-0 -- /bin/bash
+cd /opt/jboss/keycloak/bin
+. ./add-user-keycloak.sh -u admin -p admin
+. ./jboss-cli.sh --connect command=:reload
+exit
 
