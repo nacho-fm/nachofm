@@ -1,4 +1,4 @@
-# nachogym
+# nachocore
 ## Setup Development Environment
 ### Setup k8s on Mac for development purposes
 - Install docker for mac here: https://docs.docker.com/docker-for-mac/install/
